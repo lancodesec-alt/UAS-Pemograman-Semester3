@@ -1,0 +1,94 @@
+import java.sql.*;
+import java.util.Scanner;
+
+public class UAS2025SEMESTER3_NO3 {
+    private static final String URL = "jdbc:sqlite:C:\\Program Files\\Sqlite\\Databases\\gilang_akbar_hadisaputro.db";
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        Connection conn = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            
+            System.out.println("            ~ Transaksi ~");
+            System.out.print("Nomor Transaksi         : ");
+            String noTransaksi = input.nextLine();
+            System.out.println("------------------------------------------");
+
+            // 1. Proses Input Pelanggan
+            System.out.print("Input ID Pelanggan : ");
+            int idPel = input.nextInt();
+            
+            String sqlPel = "SELECT nama_pelanggan, no_telp FROM pelanggan WHERE id_pelanggan = ?";
+            PreparedStatement pstmtPel = conn.prepareStatement(sqlPel);
+            pstmtPel.setInt(1, idPel);
+            ResultSet rsPel = pstmtPel.executeQuery();
+
+            if (rsPel.next()) {
+                System.out.println("         >> " + rsPel.getString("nama_pelanggan"));
+                System.out.println("         >> " + rsPel.getString("no_telp"));
+            } else {
+                System.out.println("Data pelanggan tidak ditemukan!");
+                return;
+            }
+            System.out.println("------------------------------------------");
+
+            // 2. Proses Input Mobil
+            System.out.print("Input Kode mobil   : ");
+            String kodeMob = input.next();
+
+            String sqlMob = "SELECT merek_mobil, tipe, harga_sewa_per_hari, status_ketersediaan FROM mobil WHERE kode_mobil = ?";
+            PreparedStatement pstmtMob = conn.prepareStatement(sqlMob);
+            pstmtMob.setString(1, kodeMob);
+            ResultSet rsMob = pstmtMob.executeQuery();
+
+            int hargaSewa = 0;
+            if (rsMob.next()) {
+                hargaSewa = rsMob.getInt("harga_sewa_per_hari");
+                System.out.println("         >> " + rsMob.getString("merek_mobil") + " " + rsMob.getString("tipe"));
+                System.out.println("         >> Sewa per hari Rp " + hargaSewa);
+                System.out.println("         >> Status " + rsMob.getString("status_ketersediaan"));
+            } else {
+                System.out.println("Data mobil tidak ditemukan!");
+                return;
+            }
+            System.out.println("------------------------------------------");
+
+            // 3. Proses Hitung Total
+            System.out.print("Input Lama sewa: ");
+            int lamaSewa = input.nextInt();
+            int totalBiaya = hargaSewa * lamaSewa;
+            System.out.println("               total biaya >> " + totalBiaya);
+            System.out.println("------------------------------------------");
+
+            // --- LOGIKA UPDATE & SIMPAN ---
+            
+            // a. Update status mobil menjadi 'rented'
+            String sqlUpdate = "UPDATE mobil SET status_ketersediaan = 'rented' WHERE kode_mobil = ?";
+            PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdate);
+            pstmtUpdate.setString(1, kodeMob);
+            pstmtUpdate.executeUpdate();
+
+            // b. Simpan ke tabel rental
+            String sqlInsert = "INSERT INTO rental (id_pelanggan, kode_mobil, lama_sewa, total_biaya) VALUES (?, ?, ?, ?)";
+            PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert);
+            pstmtInsert.setInt(1, idPel);
+            pstmtInsert.setString(2, kodeMob);
+            pstmtInsert.setInt(3, lamaSewa);
+            pstmtInsert.setInt(4, totalBiaya);
+            pstmtInsert.executeUpdate();
+
+            System.out.println("Transaksi Berhasil Disimpan & Status Mobil Diperbarui.");
+
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            try {
+                if (conn != null) conn.close();
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+    }
+}
