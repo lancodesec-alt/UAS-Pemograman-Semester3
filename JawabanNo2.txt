@@ -1,0 +1,58 @@
+CREATE TABLE pelanggan (
+    id_pelanggan INTEGER PRIMARY KEY,
+    nama_pelanggan TEXT,
+    no_telp TEXT
+);
+
+INSERT INTO pelanggan (nama_pelanggan, no_telp) VALUES ('Gilang Akbar Hadisaputro', '0812345678');
+INSERT INTO pelanggan (nama_pelanggan, no_telp) VALUES ('Budi Santoso', '0811223344');
+INSERT INTO pelanggan (nama_pelanggan, no_telp) VALUES ('Siti Aminah', '0855667788');
+INSERT INTO pelanggan (nama_pelanggan, no_telp) VALUES ('Andi Wijaya', '0899001122');
+INSERT INTO pelanggan (nama_pelanggan, no_telp) VALUES ('Rina Pratama', '0813344556');
+
+
+SELECT id_pelanggan, nama_pelanggan 
+FROM pelanggan 
+WHERE nama_pelanggan LIKE '%m%' OR nama_pelanggan LIKE '%o%';
+
+
+CREATE TABLE mobil (
+    kode_mobil TEXT PRIMARY KEY,
+    merek_mobil TEXT,
+    tipe TEXT
+);
+
+
+INSERT INTO mobil (kode_mobil, merek_mobil, tipe) VALUES ('M01', 'Toyota', 'Avanza');
+INSERT INTO mobil (kode_mobil, merek_mobil, tipe) VALUES ('M02', 'Honda', 'Civic');
+INSERT INTO mobil (kode_mobil, merek_mobil, tipe) VALUES ('M03', 'Daihatsu', 'Xenia');
+INSERT INTO mobil (kode_mobil, merek_mobil, tipe) VALUES ('M04', 'Mitsubishi', 'Xpander');
+INSERT INTO mobil (kode_mobil, merek_mobil, tipe) VALUES ('M05', 'Suzuki', 'Ertiga');
+
+
+-- Menambah kolom
+ALTER TABLE mobil ADD COLUMN harga_sewa_per_hari INTEGER;
+ALTER TABLE mobil ADD COLUMN status_ketersediaan TEXT;
+
+-- Mengisi nilai (Contoh pengisian)
+UPDATE mobil SET harga_sewa_per_hari = 250000, status_ketersediaan = 'Tersedia' WHERE kode_mobil = 'M01';
+UPDATE mobil SET harga_sewa_per_hari = 500000, status_ketersediaan = 'Tersedia' WHERE kode_mobil = 'M02';
+UPDATE mobil SET harga_sewa_per_hari = 280000, status_ketersediaan = 'Disewa' WHERE kode_mobil = 'M03';
+UPDATE mobil SET harga_sewa_per_hari = 350000, status_ketersediaan = 'Tersedia' WHERE kode_mobil = 'M04';
+UPDATE mobil SET harga_sewa_per_hari = 300000, status_ketersediaan = 'Tersedia' WHERE kode_mobil = 'M05';
+
+
+UPDATE mobil 
+SET harga_sewa_per_hari = harga_sewa_per_hari + 200000 
+WHERE harga_sewa_per_hari < 300000;
+
+
+CREATE TABLE rental (
+    no_transaksi INTEGER PRIMARY KEY,
+    id_pelanggan INTEGER,
+    kode_mobil TEXT,
+    lama_sewa INTEGER,
+    total_biaya INTEGER,
+    FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan),
+    FOREIGN KEY (kode_mobil) REFERENCES mobil(kode_mobil)
+);
